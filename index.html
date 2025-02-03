@@ -3,16 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Incremental Popping</title>
+    <title>Incremental Popping 2.0</title>
     <link rel="stylesheet" href="style.css">
+    <script defer src="script.js"></script>
 </head>
 <body>
-    <h1>Incremental Popping</h1>
+    <h1>Incremental Popping 2.0</h1>
     <p>Score: <span id="score">0</span></p>
     <div id="gameArea"></div>
     <button id="upgradeAuto">Upgrade Auto Pop (Cost: 10)</button>
     <button id="upgradeSpawn">Increase Spawn Rate (Cost: 20)</button>
     <button id="upgradePoints">Increase Points Per Pop (Cost: 30)</button>
-    <script src="script.js"></script>
+    <button id="powerUpFreeze">Freeze Time (Cost: 50)</button>
+    <button id="powerUpDouble">Double Points (Cost: 75)</button>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: black;
+        }
+        #gameArea {
+            width: 300px;
+            height: 400px;
+            border: 2px solid black;
+            position: relative;
+            margin: auto;
+            background-color: white;
+        }
+        .bubble {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: blue;
+            position: absolute;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+        .bubble:active {
+            transform: scale(1.2);
+        }
+        button {
+            margin: 5px;
+            padding: 10px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+    </style>
+
+    <script>
+        let score = 0;
+        let pointsPerPop = 1;
+        let autoPopActive = false;
+        let bubbleSpawnRate = 2000;
+        let gameArea = document.getElementById("gameArea");
+        let scoreDisplay = document.getElementById("score");
+
+        function createBubble() {
+            let bubble = document.createElement("div");
+            bubble.classList.add("bubble");
+            let x = Math.random() * (gameArea.clientWidth - 30);
+            let y = Math.random() * (gameArea.clientHeight - 30);
+            bubble.style.left = x + "px";
+            bubble.style.top = y + "px";
+
+            bubble.addEventListener("click", function() {
+                score += pointsPerPop;
+                scoreDisplay.textContent = score;
+                bubble.remove();
+                playPopSound();
+            });
+
+            gameArea.appendChild(bubble);
+            setTimeout(() => bubble.remove(), 3000);
+        }
+
+        function playPopSound() {
+            let audio = new Audio("pop.mp3");
+            audio.play();
+        }
+
+        function startBubbleGeneration() {
+            setInterval(createBubble, bubbleSpawnRate);
+        }
+
+        startBubbleGeneration();
+
+        document.getElementById("upgradeAuto").addEventListener("click", function() {
+            if (score >= 10 && !autoPopActive) {
+                score -= 10;
+                autoPopActive = true;
+                setInterval(() => {
+                    let bubbles = document.querySelectorAll(".bubble");
+                    if (bubbles.length > 0) bubbles[0].click();
+                }, 1000);
+            }
+        });
+
+        document.getElementById("upgradeSpawn").addEventListener("click", function() {
+            if (score >= 20) {
+                score -= 20;
+                bubbleSpawnRate *= 0.8;
+            }
+        });
+
+        document.getElementById("upgradePoints").addEventListener("click", function() {
+            if (score >= 30) {
+                score -= 30;
+                pointsPerPop += 1;
+            }
+        });
+
+        document.getElementById("powerUpFreeze").addEventListener("click", function() {
+            if (score >= 50) {
+                score -= 50;
+                bubbleSpawnRate *= 2;
+                setTimeout(() => bubbleSpawnRate /= 2, 5000);
+            }
+        });
+
+        document.getElementById("powerUpDouble").addEventListener("click", function() {
+            if (score >= 75) {
+                score -= 75;
+                pointsPerPop *= 2;
+                setTimeout(() => pointsPerPop /= 2, 5000);
+            }
+        });
+    </script>
 </body>
 </html>
